@@ -1,0 +1,51 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  creationTimestamp: null
+  name: jvm-build-suite-component-ugnb
+  namespace: appstudio-e2e-test
+spec:
+  params:
+  - name: git-revision
+  resourcetemplates:
+  - apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      annotations:
+        build.appstudio.openshift.io/application: jvm-build-suite-application-mosp
+        build.appstudio.openshift.io/build: "true"
+        build.appstudio.openshift.io/component: jvm-build-suite-component-ugnb
+        build.appstudio.openshift.io/type: build
+        build.appstudio.openshift.io/version: "0.1"
+        pipelines.appstudio.openshift.io/type: build
+      creationTimestamp: null
+      generateName: jvm-build-suite-component-ugnb-
+      labels:
+        build.appstudio.openshift.io/application: jvm-build-suite-application-mosp
+        build.appstudio.openshift.io/build: "true"
+        build.appstudio.openshift.io/component: jvm-build-suite-component-ugnb
+        build.appstudio.openshift.io/type: build
+        build.appstudio.openshift.io/version: "0.1"
+        pipelines.appstudio.openshift.io/type: build
+      namespace: appstudio-e2e-test
+    spec:
+      params:
+      - name: git-url
+        value: https://github.com/stuartwdouglas/hacbs-test-project
+      - name: output-image
+        value: quay.io/psturc/test-images:c48a8ba4e26b4286971337a7ddc71293-$(tt.params.git-revision)
+      - name: revision
+        value: main
+      pipelineRef:
+        bundle: quay.io/redhat-appstudio/hacbs-templates-bundle:510fa6e99f1fa1f816c96354bbaf1ad155c6d9c3
+        name: java-builder
+      workspaces:
+      - name: workspace
+        persistentVolumeClaim:
+          claimName: appstudio
+        subPath: jvm-build-suite-component-ugnb/$(tt.params.git-revision)
+      - name: registry-auth
+        secret:
+          secretName: redhat-appstudio-registry-pull-secret
+    status: {}
+status: {}
